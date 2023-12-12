@@ -1,7 +1,17 @@
 # MandVOT: Mandarin Voice Onset Time (VOT) Detection Using Machine Learning
 MandVOT is a machine learning model, employing a Convolutional Neural Network (CNN) architecture, trained for the automated detection of Voice Onset Time (VOT) in Mandarin speech.
 ## Background
-### Dataset
+### Dataset Overview
+  - **Source**
+    - Institution: ``Department of Chinese and Bilingual Studies, Hong Kong Polytechnic University``
+    - Research Lead: ``Dr. Xiaocong Chen`` [Github Profile](https://github.com/felcshallot) [Google Scholar](https://scholar.google.com/citations?user=gHlLwKoAAAAJ&hl=en)
+  - **Dataset Description**
+    - This collection comprises a total of 12,522 audio recordings in WAV format, sampled at 48kHz. These recordings were captured as part of an EEG study focusing on Mandarin speech.
+  - **Speaker Details**
+    - Number of Speakers: ``38``
+    - Language: ``Mandarin``
+  - **Annotations**
+    - Each recording is accompanied by precise Voice Onset Time (VOT) annotations. These annotations have been meticulously marked using [Praat](https://www.fon.hum.uva.nl/praat/) by Dr.Xiaocong CHEN and others.
 ### Network Structure
 ```
 INPUT (MFCC Features, np.array, [64, 2813])
