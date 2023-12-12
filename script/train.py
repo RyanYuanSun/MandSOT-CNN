@@ -1,7 +1,8 @@
 import csv
 import os
 import time
-
+from datetime import datetime
+from uuid import uuid4
 import librosa
 import numpy as np
 import pandas as pd
@@ -233,6 +234,9 @@ def analyze_model_performance(file_path):
 
 def main():
     root_dir = r"/Users/taiyuan/Desktop/onsetEEG/behavioral" # directory where all dot wav files are stored
+    model_dir = r"./model" # directory for storing trained weights and log
+    if(!os.path.exists(model_dir)):
+        os.makedirs(model_dir)
 
     # Index all files in root directory
     roots, files = [], []
@@ -327,6 +331,12 @@ def main():
     early_stopping = EarlyStopping(patience=10, delta=0) # Early stopping config
 
     # Training
+    # crreate folder for output
+    unique_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
+    if(!os.path.exists(os.path.join(model_dir, uniqueid))):
+        os.makedirs(os.path.join(model_dir, unique_id))
+    output_dir=os.path.join(model_dir, uniqueid)
+    
     epoch = 0
     all_metrics = [] # store metrics for model performance evaluation
     print('\nStart training...\n')
@@ -346,18 +356,17 @@ def main():
         })
 
         print(f'[{epoch + 1}] Saving model_epoch_{epoch}.pth...\n')
-        torch.save(model.state_dict(), f'model_epoch_{epoch}.pth')
+        torch.save(model.state_dict(), os.path.join(output_dir, f'model_epoch_{epoch}.pth'))
 
         early_stopping(val_loss) # Check early stopping conditions
         epoch += 1
 
-    torch.save(model.state_dict(), f'model_final.pth')
     print(f"\nTraining complete.")
 
     # Save and analyze model metrics
     metrics_df = pd.DataFrame(all_metrics)
-    metrics_df.to_csv('training_metrics.csv', index=False)
-    analyze_model_performance('training_metrics.csv')
+    metrics_df.to_csv(os.path.join(output_dir,'training_metrics.csv'), index=False)
+    analyze_model_performance(os.path.join(output_dir,'training_metrics.csv'))
 
 
 if __name__ == '__main__':
