@@ -47,6 +47,14 @@ START
 |
 END
 ```
+#### Dataset preparation
+
+#### Model initializtion
+
+#### Training
+
+#### Evaluation
+
 ## Performance
 
 ## Install
