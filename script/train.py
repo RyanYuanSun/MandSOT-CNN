@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+from tqdm import tqdm
 import torch.optim as optim
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
@@ -173,6 +173,7 @@ def process_audio(wav_path, max_sequence_length):
         pad_width = max_sequence_length * sr - len(y)
         y = np.pad(y, pad_width=(0, pad_width))
 
+    # print(y.shape)
     # pre-emphasis
     y_emp = pre_emphasis(y)
 
@@ -192,36 +193,19 @@ def process_audio(wav_path, max_sequence_length):
     return y, mfcc
 
 
-def train(model, train_loader, criterion, optimizer, device, epoch):
+def train(model, train_loader, criterion, optimizer, device, dataset_length):
     model.train()
     train_loss = 0.0
-    start_time = time.time()
-
     for batch_idx, (inputs, targets) in enumerate(train_loader):
-        batch_start_time = time.time()
         inputs, targets = inputs.float().to(device), targets.float().to(device)
         # print(inputs.shape)
-        # inputs = inputs.unsqueeze(1)
         optimizer.zero_grad()
         outputs = model(inputs)
         loss = criterion(outputs.squeeze(), targets.squeeze())
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
-
-        batch_time = time.time() - batch_start_time
-
-        total_batches = len(train_loader)
-        remaining_batches = total_batches - (batch_idx + 1)
-        eta = remaining_batches * batch_time
-
-        eta_min, eta_sec = divmod(eta, 60)
-
-        print(f'\r[{epoch + 1}] Batch: {batch_idx + 1}/{total_batches} | RT Loss: {loss.item():.4f} | Epoch ETA: {int(eta_min)}m {int(eta_sec)}s', end='')
-
-    total_time = time.time() - start_time
-    print(f'\n[{epoch + 1}] Epoch Time Lapsed: {total_time:.2f} seconds')
-    return train_loss / len(train_loader.dataset)
+    return train_loss / dataset_length
 
 
 def evaluate(model, data_loader, criterion, device):
@@ -345,11 +329,10 @@ def main():
     all_metrics = []  # store metrics for model performance evaluation
     print('\nStart training...\n')
     while not early_stopping.early_stop:
-        train_loss = train(model, train_loader, criterion, optimizer, device, epoch)
-        val_loss, val_mae, val_mse = evaluate(model, test_loader, criterion,
-                                              device)  # evaluate model performance every epoch
-        print(
-            f'[{epoch + 1}] Train loss: {train_loss} | Validation Loss: {val_loss} | Validation MAE: {val_mae} | Validation MSE: {val_mse}')
+        train_loader_tqdm = tqdm(train_loader, desc=f"[{epoch + 1}]", total=len(train_loader), colour='GREEN')
+        train_loss = train(model, train_loader_tqdm, criterion, optimizer, device, len(train_loader.dataset))
+        val_loss, val_mae, val_mse = evaluate(model, test_loader, criterion, device)  # evaluate model performance every epoch
+        print(f'[{epoch + 1}]: Train loss: {train_loss} | Validation Loss: {val_loss} | Validation MAE: {val_mae} | Validation MSE: {val_mse}')
 
         all_metrics.append({
             "NO": len(all_metrics) + 1,
@@ -360,8 +343,7 @@ def main():
             "Validation MSE": val_mse
         })
 
-        print(f'[{epoch + 1}] Saving model_epoch_{epoch}.pth...\n')
-        torch.save(model.state_dict(), os.path.join(output_dir, f'vot_model_epoch_{epoch}_{val_loss}.pth'))
+        torch.save(model.state_dict(), os.path.join(output_dir, f'model_epoch_{epoch}_{val_loss}.pth'))
 
         early_stopping(val_loss)  # Check early stopping conditions
         epoch += 1
