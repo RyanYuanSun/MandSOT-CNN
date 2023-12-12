@@ -45,6 +45,7 @@ START
 |
 END
 ```
+## Performance
 ## Install
 ### Standard
 ### Praat Plugin
