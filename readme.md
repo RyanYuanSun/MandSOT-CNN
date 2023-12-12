@@ -18,7 +18,7 @@ INPUT (MFCC Features, np.array, [64, 2813])
 OUTPUT (VOT prediction in ms, float)
 ```
 ### Workflow
-#### Data preprocessing and feature extraction
+#### Audio preprocessing and feature extraction
 ```
 START
 |
