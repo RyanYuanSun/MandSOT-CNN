@@ -109,27 +109,19 @@ class Regression1DCNN(nn.Module):
 class GRUVoiceDetectionModel(nn.Module):
     def __init__(self):
         super(GRUVoiceDetectionModel, self).__init__()
-        # GRU层
         self.gru1 = nn.GRU(input_size=64, hidden_size=32, num_layers=1, batch_first=True)
         self.gru2 = nn.GRU(input_size=32, hidden_size=128, num_layers=1, batch_first=True)
         self.gru3 = nn.GRU(input_size=128, hidden_size=256, num_layers=1, batch_first=True)
-
-        # 全连接层
         self.fc1 = nn.Linear(256, 128)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.5)
         self.fc2 = nn.Linear(128, 1)
 
     def forward(self, x):
-        # GRU层处理
         x, _ = self.gru1(x)
         x, _ = self.gru2(x)
         x, _ = self.gru3(x)
-
-        # 取最后一个时间步的输出
         x = x[:, -1, :]
-
-        # 全连接层
         x = self.fc1(x)
         x = self.relu(x)
         x = self.dropout(x)
