@@ -1,2 +1,2 @@
 # Mandarin-VOT-ML-CNN
-CNN network for VOT detection
+CNN network for mandarin VOT detection
