@@ -335,7 +335,7 @@ def main():
     print('\nStart training...\n')
     while not early_stopping.early_stop:
         train_loss = train(model, train_loader, criterion, optimizer, device, epoch)
-        val_loss, val_mae, val_mse = evaluate(model, test_loader, criterion, device)
+        val_loss, val_mae, val_mse = evaluate(model, test_loader, criterion, device) # evaluate model performance every epoch
         print(
             f'[{epoch + 1}] Train loss: {train_loss} | Validation Loss: {val_loss} | Validation MAE: {val_mae} | Validation MSE: {val_mse}')
 
@@ -351,12 +351,13 @@ def main():
         print(f'[{epoch + 1}] Saving model_epoch_{epoch}.pth...\n')
         torch.save(model.state_dict(), f'model_epoch_{epoch}.pth')
 
-        early_stopping(val_loss)
+        early_stopping(val_loss) # Check early stopping conditions
         epoch += 1
 
     torch.save(model.state_dict(), f'model_final.pth')
     print(f"\nTraining complete.")
 
+    # Save and analyze model metrics
     metrics_df = pd.DataFrame(all_metrics)
     metrics_df.to_csv('training_metrics.csv', index=False)
     analyze_model_performance('training_metrics.csv')
