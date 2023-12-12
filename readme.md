@@ -46,10 +46,17 @@ START
 END
 ```
 ## Performance
+
 ## Install
 ### Standard
+
 ### Praat Plugin
+In progress...
+
 ### Javascript
+In progress...
+
 ## Usage
+
 ## License
 [MIT](./LICENSE) © Ryan Alloriadonis
