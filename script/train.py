@@ -314,16 +314,16 @@ def main():
 
     # Model initialization
     model = ModifiedVoiceDetectionModel().to(device)
-    
+
     # Continued training
     continued_train = 'n'
     if os.path.exists('./vot_best.pth'):
-        continued_train = str(input('vot_best.pth found, do you wanna continue training(y/n)'))
+        continued_train = str(input('vot_best.pth found, do you wanna continue training?(y/n): '))
         if continued_train == 'y':
             model.load_state_dict(torch.load('./vot_best.pth', map_location=device))
         else:
             pass
-    
+
     criterion = nn.MSELoss()  # Use MSE loss function
     optimizer = optim.Adam(model.parameters(), lr=0.001)  # Adam optimizer with learning rate 0.1
     early_stopping = EarlyStopping(patience=10, delta=0)  # Early stopping config
@@ -334,15 +334,15 @@ def main():
     if not os.path.exists(os.path.join(model_dir, unique_id)):
         os.makedirs(os.path.join(model_dir, unique_id))
     output_dir = os.path.join(model_dir, unique_id)
-    
+
     epoch = 0
     all_metrics = []  # store metrics for model performance evaluation
     val_loss_min = 0
-    
+
     if continued_train == 'y':
         val_loss, val_mae, val_mse = evaluate(model, test_loader, criterion, device)
         val_loss_min = val_loss
-    
+
     print('\nStart training...\n')
     while not early_stopping.early_stop:
         train_loader_tqdm = tqdm(train_loader, desc=f"[{epoch + 1}]", total=len(train_loader), colour='GREEN')
@@ -359,7 +359,7 @@ def main():
             "Validation MSE": val_mse
         })
         torch.save(model.state_dict(), os.path.join(output_dir, f'model_epoch_{epoch}_{val_loss}.pth'))
-        
+
         # Save the best model
         if epoch == 0 and continued_train == 'n':
             val_loss_min = val_loss
@@ -367,7 +367,7 @@ def main():
             if val_loss < val_loss_min:
                 val_loss_min = val_loss
                 torch.save(model.state_dict(), os.path.join(output_dir, f'vot_best.pth'))
-                
+
         early_stopping(val_loss)  # Check early stopping conditions
         epoch += 1
 
