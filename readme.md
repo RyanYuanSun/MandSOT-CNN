@@ -17,7 +17,7 @@ INPUT (MFCC Features, np.array, [64, 2813])
 |
 OUTPUT (VOT prediction in ms, float)
 
-Number of Parameters: 5763425
+Number of parameters: 5763425
 ```
 ### Workflow
 #### Audio preprocessing and feature extraction
