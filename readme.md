@@ -27,7 +27,7 @@ START
 |       |--- Check Sample Rate (sr)
 |       |       |--- Resample to 48kHz if sr != 48000
 |       |
-|       |--- Padding (Zero-padding to match max_sequence_length * sr)
+|       |--- Padding (Zero-padding)
 |       |--- Apply Pre-emphasis (y_emp = y[0] + y[1:] - alpha * y[:-1])
 |       |--- Perform MFCC Feature Extraction
 |               |--- Configuration:
@@ -41,7 +41,7 @@ START
 |               |
 |               |--- Compute MFCC Features (librosa.feature.mfcc)
 |
-|--- Return Processed Audio (y, [1, 720000]) and MFCC Features (mfcc, [64, 2813])
+|--- Return Processed Audio (y, np.array, [1, 720000]) and MFCC Features (mfcc, np.array, [64, 2813])
 |
 END
 ```
