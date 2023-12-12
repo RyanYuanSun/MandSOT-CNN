@@ -217,9 +217,7 @@ def train(model, train_loader, criterion, optimizer, device, epoch):
 
         eta_min, eta_sec = divmod(eta, 60)
 
-        print(
-            f'\r[{epoch + 1}] Batch: {batch_idx + 1}/{total_batches} | RT Loss: {loss.item():.4f} | Epoch ETA: {int(eta_min)}m {int(eta_sec)}s',
-            end='')
+        print(f'\r[{epoch + 1}] Batch: {batch_idx + 1}/{total_batches} | RT Loss: {loss.item():.4f} | Epoch ETA: {int(eta_min)}m {int(eta_sec)}s', end='')
 
     total_time = time.time() - start_time
     print(f'\n[{epoch + 1}] Epoch Time Lapsed: {total_time:.2f} seconds')
@@ -235,7 +233,7 @@ def evaluate(model, data_loader, criterion, device):
 
     with torch.no_grad():
         for inputs, targets in data_loader:
-            inputs, targets = inputs.float().to(device), targets.float().to(device)  # 转换为Float类型
+            inputs, targets = inputs.float().to(device), targets.float().to(device)
             outputs = model(inputs)
             loss = criterion(outputs.squeeze(), targets.squeeze())
 
