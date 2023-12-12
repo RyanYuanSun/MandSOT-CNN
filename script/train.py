@@ -310,7 +310,7 @@ def main():
     # Porecess audio data
     print('Loading and preprocessing audio(s)...')
     for idx, wav in enumerate(dataset.wav):
-        y, mfcc = process_audio(find_wav_new(wav, roots, files))
+        y, mfcc = process_audio(find_wav_new(wav, roots, files), max_sequence_length)
         mfcc_list.append(mfcc)
         signal_list.append(y)
 
