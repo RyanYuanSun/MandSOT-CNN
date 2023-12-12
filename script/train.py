@@ -14,18 +14,15 @@ from torch.utils.data import Dataset, DataLoader
 
 
 class VoiceDataset(Dataset):
-    def __init__(self, dataframe, device):
+    def __init__(self, dataframe):
         self.dataframe = dataframe
-        self.device = device
 
     def __len__(self):
         return len(self.dataframe)
 
     def __getitem__(self, idx):
         mfcc = torch.from_numpy(self.dataframe.iloc[idx]['mfcc']).float()
-        # mfcc = torch.from_numpy(self.dataframe.iloc[idx]['mfcc']).float().to(self.device)
-        onset = self.dataframe.iloc[idx]['onset']
-        # onset = torch.tensor(onset, dtype=torch.float).to(self.device)
+        onset = self.dataframe.iloc[idx]['onset'] # better float, could be int
         return mfcc, onset
 
 
