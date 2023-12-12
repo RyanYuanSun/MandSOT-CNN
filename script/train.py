@@ -236,20 +236,23 @@ def analyze_model_performance(file_path):
 
 def main():
     root_dir = r"/Users/taiyuan/Desktop/onsetEEG/behavioral" # directory where all dot wav files are stored
+
+    # Index all files in root directory
     roots, files = [], []
     for root, _, file1 in os.walk(root_dir):
         for filesub in file1:
             files.append(filesub)
             roots.append(root)
 
+    # Read VOT mark result CSV
     print('Reading CSV...')
     results_csv_path, wav_files, wav_onset = [], [], []
     root_ctn = os.listdir(root_dir)
     for ctn in root_ctn:
         if ctn.endswith('.csv'):
             results_csv_path.append(os.path.join(root_dir, ctn))
-
-    total_samples = 0
+    
+    # load dot wav file name and onset time to pandas dataFrame
     for csv_file in results_csv_path:
         with open(csv_file, 'r') as csv_in:
             lines = csv.reader(csv_in)
@@ -258,20 +261,20 @@ def main():
                 if line[3] == "1" and line[2] != '' and line[2] != '--undefined--' and line[1] != '':
                     wav_files.append(line[1])
                     wav_onset.append(float(line[2]))
-                    total_samples += 1
 
     dataset = pd.DataFrame({'wav': wav_files, 'onset': wav_onset})
 
-    mfcc_list = []
-    signal_list = []
-    max_sequence_length = 15  # in seconds
-    print('Performing MFCC...')
+    mfcc_list = [] # list for storing MFCC features
+    signal_list = [] # list for storing raw audio data time series
+    max_sequence_length = 15  # max audio length in seconds 
+
+    print('Loading and preprocessing audio(s)...')
     for idx, wav in enumerate(dataset.wav):
         print(f'\r{idx + 1}/{len(dataset.wav)}', end='')
         wav_path = find_wav_new(wav, roots, files)
-        y, sr = librosa.load(wav_path, sr=None)
+        y, sr = librosa.load(wav_path, sr=None) # load audio
 
-        # Resampling
+        # Resampling if audio's sr does not match 48khz
         target_sr = 48000
         if sr != 48000:
             y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
@@ -281,51 +284,54 @@ def main():
             pad_width = max_sequence_length * sr - len(y)
             y = np.pad(y, pad_width=(0, pad_width))
 
+        signal_list.append(y)
+
         # pre-emphasis
         def pre_emphasis(signal, alpha=0.97):
             return np.append(signal[0], signal[1:] - alpha * signal[:-1])
-
         y = pre_emphasis(y)
-
-        # MFCC
-        # config
-        n_mfcc = 64
+        
+        # MFCC feature extraction
+        # MFCC config
+        n_mfcc = 64 # number of mfcc feature
         window_length = 512
         hop_length = int(window_length / 2)
         n_fft = int(window_length)
-        n_mels = 64
+        n_mels = 64 # number of Mel filter
         fmax = sr * 0.5
-
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, n_mels=n_mels, fmax=fmax,
-                                    hop_length=hop_length, window='hamming')
+        
+        # perform mfcc
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, n_mels=n_mels, fmax=fmax, hop_length=hop_length, window='hamming')
         # mfcc = mfcc.transpose()
         # print(mfcc.shape)
-
+        
         mfcc_list.append(mfcc)
-        signal_list.append(y)
 
     dataset['mfcc'] = mfcc_list
     dataset['signal'] = signal_list
     print('\n')
     print(dataset)
 
-    train_data, test_data = train_test_split(dataset, test_size=0.1, random_state=42)
+    # Prepare dataset
+    train_data, test_data = train_test_split(dataset, test_size=0.1, random_state=42) # 90% train, 10% test
     train_dataset = VoiceDataset(train_data, device)
     test_dataset = VoiceDataset(test_data, device)
+    
     batch_size = 32
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
+    # Model initialization
     device = torch.device("mps" if torch.mps.is_available() else "cpu") # GPU accelaration with Apple M-series chipset
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu" ) # GPU accelaration with Nvidia graphic cards
-    # model = ComplexVoiceDetectionModel().to(device)
     model = ModifiedVoiceDetectionModel().to(device)
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    early_stopping = EarlyStopping(patience=10, delta=0)
+    criterion = nn.MSELoss() # Use MSE loss function
+    optimizer = optim.Adam(model.parameters(), lr=0.001) # Adam optimizer with learning rate 0.1
+    early_stopping = EarlyStopping(patience=10, delta=0) # Early stopping config
 
+    # Training
     epoch = 0
-    all_metrics = []
+    all_metrics = [] # store metrics for model performance evaluation
     print('\nStart training...\n')
     while not early_stopping.early_stop:
         train_loss = train(model, train_loader, criterion, optimizer, device, epoch)
