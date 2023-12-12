@@ -322,9 +322,9 @@ def main():
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU accelaration with Nvidia graphic cards
 
     # Prepare dataset
-    train_data, test_data = train_test_split(dataset, test_size=0.1, random_state=42)  # 90% train, 10% test
-    train_dataset = VoiceDataset(train_data, device)
-    test_dataset = VoiceDataset(test_data, device)
+    train_data, test_data = train_test_split(dataset, test_size=0.1, random_state=42)  # split train:test = 9:1
+    train_dataset = VoiceDataset(train_data)
+    test_dataset = VoiceDataset(test_data)
 
     batch_size = 32
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
