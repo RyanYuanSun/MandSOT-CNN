@@ -318,7 +318,7 @@ def main():
     dataset['signal'] = signal_list
     print(dataset)
 
-    device = torch.device("mps" if torch.mps.is_available() else "cpu")  # GPU accelaration with Apple M-series chipset
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")  # GPU accelaration with Apple M-series chipset
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU accelaration with Nvidia graphic cards
 
     # Prepare dataset
