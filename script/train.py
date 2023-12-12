@@ -156,6 +156,41 @@ def find_wav_new(name, roots, files):
         return os.path.join(roots[files.index(name)], name)
 
 
+# load, preprocess and mfcc feature extraction of audio
+process_audio(wave_path):
+    y, sr = librosa.load(wav_path, sr=None) # load audio
+
+    # Resampling if audio's sr does not match 48khz
+    target_sr = 48000
+    if sr != 48000:
+        y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
+
+    # Padding
+    if len(y) < max_sequence_length * sr:
+        pad_width = max_sequence_length * sr - len(y)
+        y = np.pad(y, pad_width=(0, pad_width))
+
+    # pre-emphasis
+    def pre_emphasis(signal, alpha=0.97):
+        return np.append(signal[0], signal[1:] - alpha * signal[:-1])
+    y_emp = pre_emphasis(y)
+    
+    # MFCC feature extraction
+    # MFCC config
+    n_mfcc = 64 # number of mfcc feature
+    window_length = 512
+    hop_length = int(window_length / 2)
+    n_fft = int(window_length)
+    n_mels = 64 # number of Mel filter
+    fmax = sr * 0.5
+    
+    # perform mfcc
+    mfcc = librosa.feature.mfcc(y=y_emp, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, n_mels=n_mels, fmax=fmax, hop_length=hop_length, window='hamming')
+    # mfcc = mfcc.transpose()
+    # print(mfcc.shape)
+    return y, mfcc
+
+
 def train(model, train_loader, criterion, optimizer, device, epoch):
     model.train()
     train_loss = 0.0
@@ -269,48 +304,15 @@ def main():
     signal_list = [] # list for storing raw audio data time series
     max_sequence_length = 15  # max audio length in seconds 
 
+    # Porecess audio data
     print('Loading and preprocessing audio(s)...')
     for idx, wav in enumerate(dataset.wav):
-        print(f'\r{idx + 1}/{len(dataset.wav)}', end='')
-        wav_path = find_wav_new(wav, roots, files)
-        y, sr = librosa.load(wav_path, sr=None) # load audio
-
-        # Resampling if audio's sr does not match 48khz
-        target_sr = 48000
-        if sr != 48000:
-            y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
-
-        # Padding
-        if len(y) < max_sequence_length * sr:
-            pad_width = max_sequence_length * sr - len(y)
-            y = np.pad(y, pad_width=(0, pad_width))
-
-        signal_list.append(y)
-
-        # pre-emphasis
-        def pre_emphasis(signal, alpha=0.97):
-            return np.append(signal[0], signal[1:] - alpha * signal[:-1])
-        y = pre_emphasis(y)
-        
-        # MFCC feature extraction
-        # MFCC config
-        n_mfcc = 64 # number of mfcc feature
-        window_length = 512
-        hop_length = int(window_length / 2)
-        n_fft = int(window_length)
-        n_mels = 64 # number of Mel filter
-        fmax = sr * 0.5
-        
-        # perform mfcc
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, n_mels=n_mels, fmax=fmax, hop_length=hop_length, window='hamming')
-        # mfcc = mfcc.transpose()
-        # print(mfcc.shape)
-        
+        y, mfcc = process_audio(find_wav_new(wav, roots, files))
         mfcc_list.append(mfcc)
+        signal_list.append(y)
 
     dataset['mfcc'] = mfcc_list
     dataset['signal'] = signal_list
-    print('\n')
     print(dataset)
 
     # Prepare dataset
