@@ -363,7 +363,7 @@ def main():
         })
 
         print(f'[{epoch + 1}] Saving model_epoch_{epoch}.pth...\n')
-        torch.save(model.state_dict(), os.path.join(output_dir, f'model_epoch_{epoch}.pth'))
+        torch.save(model.state_dict(), os.path.join(output_dir, f'model_epoch_{epoch}_{val_loss}.pth'))
 
         early_stopping(val_loss)  # Check early stopping conditions
         epoch += 1
