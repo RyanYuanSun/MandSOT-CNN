@@ -157,25 +157,25 @@ def find_wav_new(name, roots, files):
 
 def pre_emphasis(signal, alpha=0.97):
     return np.append(signal[0], signal[1:] - alpha * signal[:-1])
-    
-    
+
+
 # load, preprocess and mfcc feature extraction of audio
 def process_audio(wav_path, max_sequence_length):
     y, sr = librosa.load(wav_path, sr=None)  # load audio
-    
+
     # Resampling if audio's sr does not match 48khz
     target_sr = 48000
     if sr != 48000:
         y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
-    
+
     # Padding
     if len(y) < max_sequence_length * sr:
         pad_width = max_sequence_length * sr - len(y)
         y = np.pad(y, pad_width=(0, pad_width))
-    
+
     # pre-emphasis
     y_emp = pre_emphasis(y)
-    
+
     # MFCC feature extraction
     # MFCC config
     n_mfcc = 64  # number of mfcc feature
@@ -184,7 +184,7 @@ def process_audio(wav_path, max_sequence_length):
     n_fft = int(window_length)
     n_mels = 64  # number of Mel filter
     fmax = sr * 0.5
-    
+
     # perform mfcc
     mfcc = librosa.feature.mfcc(y=y_emp, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, n_mels=n_mels, fmax=fmax, hop_length=hop_length, window='hamming')
     # mfcc = mfcc.transpose()
@@ -273,7 +273,7 @@ def analyze_model_performance(file_path):
 def main():
     root_dir = r"/Users/taiyuan/Desktop/onsetEEG/behavioral"  # directory where all dot wav files are stored
     model_dir = r"./model"  # directory for storing trained weights and log
-    if (!os.path.exists(model_dir)):
+    if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
     # Index all files in root directory
@@ -305,7 +305,7 @@ def main():
 
     mfcc_list = []  # list for storing MFCC features
     signal_list = []  # list for storing raw audio data time series
-    max_sequence_length = 15  # max audio length in seconds 
+    max_sequence_length = 15  # max audio length in seconds
 
     # Porecess audio data
     print('Loading and preprocessing audio(s)...')
@@ -318,6 +318,9 @@ def main():
     dataset['signal'] = signal_list
     print(dataset)
 
+    device = torch.device("mps" if torch.mps.is_available() else "cpu")  # GPU accelaration with Apple M-series chipset
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU accelaration with Nvidia graphic cards
+
     # Prepare dataset
     train_data, test_data = train_test_split(dataset, test_size=0.1, random_state=42)  # 90% train, 10% test
     train_dataset = VoiceDataset(train_data, device)
@@ -328,19 +331,17 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # Model initialization
-    device = torch.device("mps" if torch.mps.is_available() else "cpu")  # GPU accelaration with Apple M-series chipset
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU accelaration with Nvidia graphic cards
     model = ModifiedVoiceDetectionModel().to(device)
     criterion = nn.MSELoss()  # Use MSE loss function
     optimizer = optim.Adam(model.parameters(), lr=0.001)  # Adam optimizer with learning rate 0.1
     early_stopping = EarlyStopping(patience=10, delta=0)  # Early stopping config
 
     # Training
-    # crreate folder for output
+    # create folder for output
     unique_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-    if (!os.path.exists(os.path.join(model_dir, uniqueid))):
+    if not os.path.exists(os.path.join(model_dir, unique_id)):
         os.makedirs(os.path.join(model_dir, unique_id))
-    output_dir = os.path.join(model_dir, uniqueid)
+    output_dir = os.path.join(model_dir, unique_id)
 
     epoch = 0
     all_metrics = []  # store metrics for model performance evaluation
