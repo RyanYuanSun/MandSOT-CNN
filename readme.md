@@ -51,4 +51,4 @@ END
 ### Javascript
 ## Usage
 ## License
-[MIT](../LICENSE) © Ryan Alloriadonis
+[MIT](./LICENSE) © Ryan Alloriadonis
