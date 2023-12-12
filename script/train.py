@@ -23,7 +23,7 @@ class VoiceDataset(Dataset):
 
     def __getitem__(self, idx):
         mfcc = torch.from_numpy(self.dataframe.iloc[idx]['mfcc']).float()
-        onset = self.dataframe.iloc[idx]['onset'] # better float, could be int
+        onset = self.dataframe.iloc[idx]['onset']  # better float, could be int
         return mfcc, onset
 
 
@@ -101,7 +101,6 @@ class Regression1DCNN(nn.Module):
         return x
 """
 
-
 """
 # RNN(GRU)
 class GRUVoiceDetectionModel(nn.Module):
@@ -156,32 +155,34 @@ def find_wav_new(name, roots, files):
         return os.path.join(roots[files.index(name)], name)
 
 
+def pre_emphasis(signal, alpha=0.97):
+    return np.append(signal[0], signal[1:] - alpha * signal[:-1])
+    
+    
 # load, preprocess and mfcc feature extraction of audio
-process_audio(wave_path):
-    y, sr = librosa.load(wav_path, sr=None) # load audio
-
+def process_audio(wav_path, max_sequence_length):
+    y, sr = librosa.load(wav_path, sr=None)  # load audio
+    
     # Resampling if audio's sr does not match 48khz
     target_sr = 48000
     if sr != 48000:
         y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
-
+    
     # Padding
     if len(y) < max_sequence_length * sr:
         pad_width = max_sequence_length * sr - len(y)
         y = np.pad(y, pad_width=(0, pad_width))
-
+    
     # pre-emphasis
-    def pre_emphasis(signal, alpha=0.97):
-        return np.append(signal[0], signal[1:] - alpha * signal[:-1])
     y_emp = pre_emphasis(y)
     
     # MFCC feature extraction
     # MFCC config
-    n_mfcc = 64 # number of mfcc feature
+    n_mfcc = 64  # number of mfcc feature
     window_length = 512
     hop_length = int(window_length / 2)
     n_fft = int(window_length)
-    n_mels = 64 # number of Mel filter
+    n_mels = 64  # number of Mel filter
     fmax = sr * 0.5
     
     # perform mfcc
@@ -216,7 +217,9 @@ def train(model, train_loader, criterion, optimizer, device, epoch):
 
         eta_min, eta_sec = divmod(eta, 60)
 
-        print(f'\r[{epoch + 1}] Batch: {batch_idx + 1}/{total_batches} | RT Loss: {loss.item():.4f} | Epoch ETA: {int(eta_min)}m {int(eta_sec)}s',end='')
+        print(
+            f'\r[{epoch + 1}] Batch: {batch_idx + 1}/{total_batches} | RT Loss: {loss.item():.4f} | Epoch ETA: {int(eta_min)}m {int(eta_sec)}s',
+            end='')
 
     total_time = time.time() - start_time
     print(f'\n[{epoch + 1}] Epoch Time Lapsed: {total_time:.2f} seconds')
@@ -268,9 +271,9 @@ def analyze_model_performance(file_path):
 
 
 def main():
-    root_dir = r"/Users/taiyuan/Desktop/onsetEEG/behavioral" # directory where all dot wav files are stored
-    model_dir = r"./model" # directory for storing trained weights and log
-    if(!os.path.exists(model_dir)):
+    root_dir = r"/Users/taiyuan/Desktop/onsetEEG/behavioral"  # directory where all dot wav files are stored
+    model_dir = r"./model"  # directory for storing trained weights and log
+    if (!os.path.exists(model_dir)):
         os.makedirs(model_dir)
 
     # Index all files in root directory
@@ -287,7 +290,7 @@ def main():
     for ctn in root_ctn:
         if ctn.endswith('.csv'):
             results_csv_path.append(os.path.join(root_dir, ctn))
-    
+
     # load dot wav file name and onset time to pandas dataFrame
     for csv_file in results_csv_path:
         with open(csv_file, 'r') as csv_in:
@@ -300,8 +303,8 @@ def main():
 
     dataset = pd.DataFrame({'wav': wav_files, 'onset': wav_onset})
 
-    mfcc_list = [] # list for storing MFCC features
-    signal_list = [] # list for storing raw audio data time series
+    mfcc_list = []  # list for storing MFCC features
+    signal_list = []  # list for storing raw audio data time series
     max_sequence_length = 15  # max audio length in seconds 
 
     # Porecess audio data
@@ -316,35 +319,36 @@ def main():
     print(dataset)
 
     # Prepare dataset
-    train_data, test_data = train_test_split(dataset, test_size=0.1, random_state=42) # 90% train, 10% test
+    train_data, test_data = train_test_split(dataset, test_size=0.1, random_state=42)  # 90% train, 10% test
     train_dataset = VoiceDataset(train_data, device)
     test_dataset = VoiceDataset(test_data, device)
-    
+
     batch_size = 32
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # Model initialization
-    device = torch.device("mps" if torch.mps.is_available() else "cpu") # GPU accelaration with Apple M-series chipset
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu" ) # GPU accelaration with Nvidia graphic cards
+    device = torch.device("mps" if torch.mps.is_available() else "cpu")  # GPU accelaration with Apple M-series chipset
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU accelaration with Nvidia graphic cards
     model = ModifiedVoiceDetectionModel().to(device)
-    criterion = nn.MSELoss() # Use MSE loss function
-    optimizer = optim.Adam(model.parameters(), lr=0.001) # Adam optimizer with learning rate 0.1
-    early_stopping = EarlyStopping(patience=10, delta=0) # Early stopping config
+    criterion = nn.MSELoss()  # Use MSE loss function
+    optimizer = optim.Adam(model.parameters(), lr=0.001)  # Adam optimizer with learning rate 0.1
+    early_stopping = EarlyStopping(patience=10, delta=0)  # Early stopping config
 
     # Training
     # crreate folder for output
     unique_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-    if(!os.path.exists(os.path.join(model_dir, uniqueid))):
+    if (!os.path.exists(os.path.join(model_dir, uniqueid))):
         os.makedirs(os.path.join(model_dir, unique_id))
-    output_dir=os.path.join(model_dir, uniqueid)
-    
+    output_dir = os.path.join(model_dir, uniqueid)
+
     epoch = 0
-    all_metrics = [] # store metrics for model performance evaluation
+    all_metrics = []  # store metrics for model performance evaluation
     print('\nStart training...\n')
     while not early_stopping.early_stop:
         train_loss = train(model, train_loader, criterion, optimizer, device, epoch)
-        val_loss, val_mae, val_mse = evaluate(model, test_loader, criterion, device) # evaluate model performance every epoch
+        val_loss, val_mae, val_mse = evaluate(model, test_loader, criterion,
+                                              device)  # evaluate model performance every epoch
         print(
             f'[{epoch + 1}] Train loss: {train_loss} | Validation Loss: {val_loss} | Validation MAE: {val_mae} | Validation MSE: {val_mse}')
 
@@ -360,15 +364,15 @@ def main():
         print(f'[{epoch + 1}] Saving model_epoch_{epoch}.pth...\n')
         torch.save(model.state_dict(), os.path.join(output_dir, f'model_epoch_{epoch}.pth'))
 
-        early_stopping(val_loss) # Check early stopping conditions
+        early_stopping(val_loss)  # Check early stopping conditions
         epoch += 1
 
     print(f"\nTraining complete.")
 
     # Save and analyze model metrics
     metrics_df = pd.DataFrame(all_metrics)
-    metrics_df.to_csv(os.path.join(output_dir,'training_metrics.csv'), index=False)
-    analyze_model_performance(os.path.join(output_dir,'training_metrics.csv'))
+    metrics_df.to_csv(os.path.join(output_dir, 'training_metrics.csv'), index=False)
+    analyze_model_performance(os.path.join(output_dir, 'training_metrics.csv'))
 
 
 if __name__ == '__main__':
