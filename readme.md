@@ -91,14 +91,16 @@ OUTPUT <VOT Prediction, float>
 ## Performance
 
 ## Install
-### Standard
-
+### Python
+```shell
+pip install mandvot
+```
 ### Praat Plugin
 In progress...
-
 ### Javascript
-In progress...
-
+```html
+<script src="https://www.sunrays.top/js/mandvot.js"></script>
+```
 ## Usage
 
 ## License
