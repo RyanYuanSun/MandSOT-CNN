@@ -35,6 +35,7 @@ Number of parameters: 5763425
     ```
     START <dataset, pd.dataFrame, [0, 0]>
     |
+    |
     |--- Read VOT annotaion CSV(s) <dataset, pd.dataFrame, [2('wav','onset'), N_audio]>
     |--- Load Audio (wav path from CSV(s))
     |       |--- Read raw audio signal
@@ -57,9 +58,26 @@ Number of parameters: 5763425
     |
     |--- Return Processed Audio (y, np.array, [1, 720000]) and MFCC Features (mfcc, np.array, [64, 2813])
     |
+    |
     END <dataset, pd.dataFrame, [4('wav','onset','signal','mfcc'), N_audio]>
     ```
   - Cleaning
+    ```
+    START <dataset, pd.dataFrame, [4('wav','onset','signal','mfcc'), N_audio]>
+    |
+    |
+    |--- Audio file missing
+    |       |--- Removed from dataset
+    |
+    |--- Invalid onset annotation
+    |       |--- Removed from dataset
+    |
+    |--- Identical
+    |       |--- Removed redundant from dataset
+    |
+    |
+    END <dataset, pd.dataFrame, [4('wav','onset','signal','mfcc'), (N_audio - N_audio_bad)]>
+    ```
   - Augmentation
   - Train/test splitting
 #### Dataset preparation
