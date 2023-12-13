@@ -92,9 +92,10 @@ OUTPUT <VOT Prediction, float>
 
 ## Install
 ### Python
-```shell
-pip install mandvot
-```
+- Pip
+  ```shell
+  pip install mandvot
+  ```
 ### Praat Plugin
 In progress...
 ### Javascript
