@@ -16,18 +16,18 @@ MandVOT is a machine learning model, employing a Convolutional Neural Network (C
 ```
 INPUT <MFCC Features, np.array, [64, 2813]>
 |
-|--- Conv1 (32 filters, kernel=3, ReLU)
-|       |--- Max Pooling (kernel=2)
 |
-|--- Conv2 (64 filters, kernel=3, ReLU)
-|       |--- Max Pooling (kernel=2)
+|--- Conv1 (32 filters, kernel=3, ReLU)  --|
+|       |--- Max Pooling (kernel=2)        |
+|                                          |
+|--- Conv2 (64 filters, kernel=3, ReLU)    |--- Parameters: 5763425
+|       |--- Max Pooling (kernel=2)        |
+|                                          |
+|--- Fully Connected (128 units, ReLU)     |
+|--- Fully Connected (1 unit)            --|
 |
-|--- Fully Connected (128 units, ReLU)
-|--- Fully Connected (1 unit)
 |
-OUTPUT (VOT prediction in ms, float)
-
-Number of parameters: 5763425
+OUTPUT <VOT Prediction, float>
 ```
 ### Workflow
 #### Dataset Preparation
