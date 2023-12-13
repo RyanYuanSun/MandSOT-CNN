@@ -14,7 +14,7 @@ MandVOT is a machine learning model, employing a Convolutional Neural Network (C
     - Each recording is accompanied by precise Voice Onset Time (VOT) annotations. These annotations have been meticulously marked using [Praat](https://www.fon.hum.uva.nl/praat/) by Dr.Xiaocong CHEN and others.
 ### Network Structure
 ```
-INPUT (MFCC Features, np.array, [64, 2813])
+INPUT <MFCC Features, np.array, [64, 2813]>
 |
 |-- -Conv1 (32 filters, kernel=3, ReLU)
 |       |--- Max Pooling (kernel=2)
