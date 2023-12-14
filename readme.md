@@ -2,7 +2,7 @@
 [![forthebadge](https://forthebadge.com/images/badges/license-mit.svg)](https://forthebadge.com)
 
 # MandSOT: Mandarin Speech Onset Time (VOT) Detection Using Machine Learning
-MandVOT is a machine learning model, employing a Convolutional Neural Network (CNN) architecture, trained for the automated detection of Speech Onset Time (SOT) in Mandarin speech.
+MandSOT is a machine learning model, employing a Convolutional Neural Network (CNN) architecture, trained for the automated detection of Speech Onset Time (SOT) in Mandarin speech.
 ## Background
 ### Dataset Overview
   - **Source**
@@ -14,7 +14,7 @@ MandVOT is a machine learning model, employing a Convolutional Neural Network (C
     - Number of Speakers: ``38``
     - Language: ``Mandarin``
   - **Annotations**
-    - Each recording is accompanied by precise Voice Onset Time (VOT) annotations. These annotations have been meticulously marked using [Praat](https://www.fon.hum.uva.nl/praat/) by Dr.Xiaocong CHEN and others.
+    - Each recording is accompanied by precise Speech Onset Time (SOT) annotations. These annotations have been meticulously marked using [Praat](https://www.fon.hum.uva.nl/praat/) by Dr.Xiaocong CHEN and others.
 ### Network Structure
 ```
 INPUT <MFCC Features, np.array, [64, 2813]>
