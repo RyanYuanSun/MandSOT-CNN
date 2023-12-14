@@ -166,7 +166,7 @@ def pre_emphasis(signal, alpha=0.97):
 
 
 # load, preprocess and mfcc feature extraction of audio
-def process_audio(wav_path, max_sequence_length):
+def process_audio(wav_path):
     y, sr = librosa.load(wav_path, sr=None)  # load audio
 
     # Resampling if audio's sr does not match 48khz
