@@ -64,16 +64,22 @@ class ComplexVoiceDetectionModel(nn.Module):
 class ModifiedVoiceDetectionModel(nn.Module):
     def __init__(self):
         super(ModifiedVoiceDetectionModel, self).__init__()
-        self.conv1 = nn.Conv1d(in_channels=64, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(in_channels=224, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.pool1 = nn.MaxPool1d(kernel_size=2)
         self.conv2 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3)
         self.pool2 = nn.MaxPool1d(kernel_size=2)
-        self.fc1 = nn.Linear(in_features=44928, out_features=128)
+        self.conv3 = nn.Conv1d(in_channels=64, out_channels=32, kernel_size=3)
+        self.pool3 = nn.MaxPool1d(kernel_size=2)
+        self.conv4 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3)
+        self.pool4 = nn.MaxPool1d(kernel_size=2)
+        self.fc1 = nn.Linear(in_features=16256, out_features=128)
         self.fc2 = nn.Linear(in_features=128, out_features=1)
 
     def forward(self, x):
         x = self.pool1(torch.relu(self.conv1(x)))
         x = self.pool2(torch.relu(self.conv2(x)))
+        x = self.pool3(torch.relu(self.conv3(x)))
+        x = self.pool4(torch.relu(self.conv4(x)))
         x = x.view(x.size(0), -1)
         x = torch.relu(self.fc1(x))
         x = self.fc2(x)
@@ -169,8 +175,8 @@ def process_audio(wav_path, max_sequence_length):
         y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
 
     # Padding
-    if len(y) < max_sequence_length * sr:
-        pad_width = max_sequence_length * sr - len(y)
+    if len(y) < 524288:
+        pad_width = 524288 - len(y)
         y = np.pad(y, pad_width=(0, pad_width))
 
     # print(y.shape)
@@ -179,23 +185,42 @@ def process_audio(wav_path, max_sequence_length):
 
     # MFCC feature extraction
     # MFCC config
-    n_mfcc = 64  # number of mfcc feature
-    window_length = 512
+    n_mfcc = 128  # number of mfcc feature
+    n_mfcc_2 = 64
+    n_mfcc_3 = 32
+    window_length = 1024
+    window_length_2 = 512
+    window_length_3 = 256
     hop_length = int(window_length / 2)
+    hop_length_2 = int(window_length_2 / 2)
+    hop_length_3 = int(window_length_3 / 2)
     n_fft = int(window_length)
-    n_mels = 64  # number of Mel filter
-    fmax = sr * 0.5
+    n_fft_2 = int(window_length_2)
+    n_fft_3 = int(window_length_3)
+    n_mels = 128  # number of Mel filter
+    n_mels_2 = 64  # number of Mel filter
+    n_mels_3 = 32  # number of Mel filter
+    fmax = 10000
 
     # perform mfcc
     mfcc = librosa.feature.mfcc(y=y_emp, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, n_mels=n_mels, fmax=fmax, hop_length=hop_length, window='hamming')
+    mfcc_2 = librosa.feature.mfcc(y=y_emp, sr=sr, n_mfcc=n_mfcc_2, n_fft=n_fft_2, n_mels=n_mels_2, fmax=fmax,
+                                hop_length=hop_length_2, window='hamming')
+    mfcc_3 = librosa.feature.mfcc(y=y_emp, sr=sr, n_mfcc=n_mfcc_3, n_fft=n_fft_3, n_mels=n_mels_3, fmax=fmax,
+                                hop_length=hop_length_3, window='hamming')
+    mfcc = np.repeat(mfcc, 4, axis=1)[:, :4096]
+    mfcc_2 = np.repeat(mfcc_2, 2, axis=1)[:, :4096]
+    mfcc_3 = mfcc_3[:, :4096]
+    mfcc_total = np.concatenate((mfcc, mfcc_2, mfcc_3), axis=0)
     # mfcc = mfcc.transpose()
-    # print(mfcc.shape)
-    return y, mfcc
+    # print(mfcc_total.shape)
+    return y, mfcc_total
 
 
 def train(model, train_loader, criterion, optimizer, device, dataset_length):
     model.train()
     train_loss = 0.0
+    total_samples = 0
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         inputs, targets = inputs.float().to(device), targets.float().to(device)
         # print(inputs.shape)
@@ -205,7 +230,8 @@ def train(model, train_loader, criterion, optimizer, device, dataset_length):
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
-    return train_loss / dataset_length
+        total_samples += len(inputs)
+    return train_loss / total_samples
 
 
 def evaluate(model, data_loader, criterion, device):
@@ -287,12 +313,12 @@ def main():
 
     mfcc_list = []  # list for storing MFCC features
     signal_list = []  # list for storing raw audio data time series
-    max_sequence_length = 15  # max audio length in seconds
+    max_sequence_length = 10  # max audio length in seconds
 
     # Porecess audio data
     print('Loading and preprocessing audio(s)...')
-    for idx, wav in enumerate(dataset.wav):
-        y, mfcc = process_audio(find_wav_new(wav, roots, files), max_sequence_length)
+    for idx, wav in enumerate(tqdm(dataset.wav)):
+        y, mfcc = process_audio(find_wav_new(wav, roots, files))
         mfcc_list.append(mfcc)
         signal_list.append(y)
 
@@ -308,7 +334,7 @@ def main():
     train_dataset = VoiceDataset(train_data)
     test_dataset = VoiceDataset(test_data)
 
-    batch_size = 32
+    batch_size = 64
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
