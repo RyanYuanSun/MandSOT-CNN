@@ -1,8 +1,8 @@
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/license-mit.svg)](https://forthebadge.com)
 
-# MandVOT: Mandarin Voice Onset Time (VOT) Detection Using Machine Learning
-MandVOT is a machine learning model, employing a Convolutional Neural Network (CNN) architecture, trained for the automated detection of Voice Onset Time (VOT) in Mandarin speech.
+# MandSOT: Mandarin Speech Onset Time (VOT) Detection Using Machine Learning
+MandVOT is a machine learning model, employing a Convolutional Neural Network (CNN) architecture, trained for the automated detection of Speech Onset Time (VOT) in Mandarin speech.
 ## Background
 ### Dataset Overview
   - **Source**
@@ -30,7 +30,7 @@ INPUT <MFCC Features, np.array, [64, 2813]>
 |--- Fully Connected (1 unit)            --|
 |
 |
-OUTPUT <VOT Prediction, float>
+OUTPUT <SOT Prediction, float>
 ```
 ### Workflow
 #### Dataset Preparation
@@ -39,7 +39,7 @@ OUTPUT <VOT Prediction, float>
     START <dataset, pd.dataFrame, [0, 0]>
     |
     |
-    |--- Read VOT annotaion CSV(s) <dataset, pd.dataFrame, [2('wav','onset'), N_audio]>
+    |--- Read SOT annotaion CSV(s) <dataset, pd.dataFrame, [2('wav','onset'), N_audio]>
     |--- Load Audio (wav path from CSV(s))
     |       |--- Read raw audio signal
     |       |--- Check Sample Rate (sr)
@@ -96,19 +96,19 @@ OUTPUT <VOT Prediction, float>
 ## Install
 ### Python
 ```shell
-pip install mandvot
+pip install mandsot
 ```
 ### Praat Plugin
 In progress...
 ### Javascript
 ```html
-<script src="https://www.sunrays.top/js/mandvot.js"></script>
+<script src="https://www.sunrays.top/js/mandsot.js"></script>
 ```
 ## Usage
 ### Train
 #### Python
   - Prepare dataset
-    - ```vot.csv```
+    - ```example.csv```
       ```
       wav_name                       onset  on/off
       ---------------------------------------------
