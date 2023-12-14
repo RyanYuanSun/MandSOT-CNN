@@ -105,6 +105,21 @@ In progress...
 <script src="https://www.sunrays.top/js/mandvot.js"></script>
 ```
 ## Usage
+### Train
+#### Python
+  - Prepare dataset
+    - ```vot.csv```
+      ```
+      wav_name                       onset  on/off
+      ---------------------------------------------
+      example_audio_1.wav            898    1
+      example_audio_2.wav            1145   1
+      example_audio_3.wav            764    1
+      ...
+      ---------------------------------------------
+      ```
+
+### Inference
 
 ## License
 [MIT](./LICENSE) © Ryan Alloriadonis
