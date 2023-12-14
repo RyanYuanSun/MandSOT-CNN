@@ -5,7 +5,7 @@
 MandSOT is a machine learning model, employing a Convolutional Neural Network (CNN) architecture, trained for the automated detection of Speech Onset Time (SOT) in Mandarin speech.
 ## Background
 ### Datasets
-#### Mandarin word (2 character) speech recordings
+#### Mandarin Speeches
   - **Source**
     - Institution: ``Department of Chinese and Bilingual Studies, Hong Kong Polytechnic University``
     - Research Lead: ``Dr. Xiaocong Chen`` [Github Profile](https://github.com/felcshallot) [Google Scholar](https://scholar.google.com/citations?user=gHlLwKoAAAAJ&hl=en)
@@ -16,7 +16,7 @@ MandSOT is a machine learning model, employing a Convolutional Neural Network (C
     - Language: ``Mandarin``
   - **Annotations**
     - Each recording is accompanied by precise Speech Onset Time (SOT) annotations. These annotations have been meticulously marked using [Praat](https://www.fon.hum.uva.nl/praat/) by Dr.Xiaocong CHEN and others.
-#### Noise dataset
+#### Acoustic Noises
 See [DEMAND Dataset](https://www.kaggle.com/datasets/chrisfilo/demand).
 ### Network Structure
 ```
