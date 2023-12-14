@@ -17,7 +17,11 @@ MandSOT is a machine learning model, employing a Convolutional Neural Network (C
   - **Annotations**
     - Each recording is accompanied by precise Speech Onset Time (SOT) annotations. These annotations have been meticulously marked using [Praat](https://www.fon.hum.uva.nl/praat/) by Dr.Xiaocong CHEN and others.
 #### Acoustic Noises
-See [DEMAND Dataset](https://www.kaggle.com/datasets/chrisfilo/demand).
+  - DEMAND Dataset
+    - See [DEMAND Dataset](https://www.kaggle.com/datasets/chrisfilo/demand).
+  - Other Noises
+    - Background noise recorded in room ZB217 at UBSN, Hong Kong Polytechnic University with AC fan set to lvl 1, 2 and 3.
+    - Background noise recorded in office GH709, Hong Kong Polytechnic University
 ### Network Structure
 ```
 INPUT <MFCC Features, np.array, [64, 2813]>
