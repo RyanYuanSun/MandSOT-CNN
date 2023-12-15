@@ -51,36 +51,36 @@ Estimated Total Size (MB): 15.34
 ```
 ### Workflow
 #### Dataset Preparation
-    ```
-    START <dataset, pd.dataFrame, [0, 0]>
-    |
-    |
-    |--- Read SOT annotaion CSV(s) <dataset, pd.dataFrame, [2('wav','onset'), N_audio]>
-    |--- Load Audio (wav path from CSV(s))
-    |       |--- Read raw audio signal
-    |       |--- Check Sample Rate (sr)
-    |       |       |--- Resample to 48kHz if sr != 48000
-    |       |
-    |       |--- Data Augmentation (adding noise)
-    |       |--- Padding (Zero-padding)
-    |       |--- Apply Pre-emphasis (y_emp = y[0] + y[1:] - alpha * y[:-1])
-    |       |--- Perform MFCC Feature Extraction
-    |               |--- Configuration:
-    |               |       - Number of MFCC features (n_mfcc): 32/64/128
-    |               |       - Window length: 256/512/1024
-    |               |       - Hop length: window_length / 2
-    |               |       - Number of FFT points (n_fft): window_length
-    |               |       - Number of Mel filter banks (n_mels): 32/64/128
-    |               |       - Maximum frequency (fmax): 10000 Hz
-    |               |       - Window function: 'hamming'
-    |               |
-    |               |--- Compute and Combine MFCC Features (librosa.feature.mfcc)
-    |
-    |--- Return MFCC Features (mfcc, np.array, [224, 4096])
-    |
-    |
-    END <dataset, pd.dataFrame, [3('wav','onset','mfcc'), N]>
-    ```
+```
+START <dataset, pd.dataFrame, [0, 0]>
+|
+|
+|--- Read SOT annotaion CSV(s) <dataset, pd.dataFrame, [2('wav','onset'), N_audio]>
+|--- Load Audio (wav path from CSV(s))
+|       |--- Read raw audio signal
+|       |--- Check Sample Rate (sr)
+|       |       |--- Resample to 48kHz if sr != 48000
+|       |
+|       |--- Data Augmentation (adding noise)
+|       |--- Padding (Zero-padding)
+|       |--- Apply Pre-emphasis (y_emp = y[0] + y[1:] - alpha * y[:-1])
+|       |--- Perform MFCC Feature Extraction
+|               |--- Configuration:
+|               |       - Number of MFCC features (n_mfcc): 32/64/128
+|               |       - Window length: 256/512/1024
+|               |       - Hop length: window_length / 2
+|               |       - Number of FFT points (n_fft): window_length
+|               |       - Number of Mel filter banks (n_mels): 32/64/128
+|               |       - Maximum frequency (fmax): 10000 Hz
+|               |       - Window function: 'hamming'
+|               |
+|               |--- Compute and Combine MFCC Features (librosa.feature.mfcc)
+|
+|--- Return MFCC Features (mfcc, np.array, [224, 4096])
+|
+|
+END <dataset, pd.dataFrame, [3('wav','onset','mfcc'), N]>
+```
 #### Model initializtion
 
 #### Training
