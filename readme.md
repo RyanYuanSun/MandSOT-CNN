@@ -52,7 +52,7 @@ Estimated Total Size (MB): 15.34
 ### Workflow
 #### Dataset Preparation
 ```
-START <dataset, pd.dataFrame, [0, 0]>
+INPUT <dataset, pd.dataFrame, [0, 0]>
 |
 |
 |--- Read SOT annotaion CSV(s) <dataset, pd.dataFrame, [2('wav','onset'), N_audio]>
@@ -79,7 +79,7 @@ START <dataset, pd.dataFrame, [0, 0]>
 |--- Return MFCC Features (mfcc, np.array, [224, 4096])
 |
 |
-END <dataset, pd.dataFrame, [3('wav','onset','mfcc'), N]>
+OUTPUT <dataset, pd.dataFrame, [3('wav','onset','mfcc'), N]>
 ```
 #### Model initializtion
 
