@@ -71,7 +71,7 @@ Estimated Total Size (MB): 15.34
     |               |       - Hop length: window_length / 2
     |               |       - Number of FFT points (n_fft): window_length
     |               |       - Number of Mel filter banks (n_mels): 32/64/128
-    |               |       - Maximum frequency (fmax): 10000
+    |               |       - Maximum frequency (fmax): 10000 Hz
     |               |       - Window function: 'hamming'
     |               |
     |               |--- Compute and Combine MFCC Features (librosa.feature.mfcc)
