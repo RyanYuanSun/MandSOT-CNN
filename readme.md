@@ -25,20 +25,29 @@ MandSOT is a machine learning model, employing a Convolutional Neural Network (C
     - Background noise recorded in office GH709, Hong Kong Polytechnic University.
 ### Network Structure
 ```
-INPUT <MFCC Features, np.array, [64, 2813]>
-|
-|
-|--- Conv1 (32 filters, kernel=3, ReLU)  --|
-|       |--- Max Pooling (kernel=2)        |
-|                                          |
-|--- Conv2 (64 filters, kernel=3, ReLU)    |--- Parameters: 5763425
-|       |--- Max Pooling (kernel=2)        |
-|                                          |
-|--- Fully Connected (128 units, ReLU)     |
-|--- Fully Connected (1 unit)            --|
-|
-|
-OUTPUT <SOT Prediction, float>
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv1d-1             [-1, 32, 4096]          21,536
+         MaxPool1d-2             [-1, 32, 2048]               0
+            Conv1d-3             [-1, 64, 2046]           6,208
+         MaxPool1d-4             [-1, 64, 1023]               0
+            Conv1d-5             [-1, 32, 1021]           6,176
+         MaxPool1d-6              [-1, 32, 510]               0
+            Conv1d-7              [-1, 64, 508]           6,208
+         MaxPool1d-8              [-1, 64, 254]               0
+            Linear-9                  [-1, 128]       2,080,896
+           Linear-10                    [-1, 1]             129
+================================================================
+Total params: 2,121,153
+Trainable params: 2,121,153
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 3.50
+Forward/backward pass size (MB): 3.75
+Params size (MB): 8.09
+Estimated Total Size (MB): 15.34
+----------------------------------------------------------------
 ```
 ### Workflow
 #### Dataset Preparation
