@@ -51,7 +51,6 @@ Estimated Total Size (MB): 15.34
 ```
 ### Workflow
 #### Dataset Preparation
-  - Reading
     ```
     START <dataset, pd.dataFrame, [0, 0]>
     |
@@ -62,46 +61,26 @@ Estimated Total Size (MB): 15.34
     |       |--- Check Sample Rate (sr)
     |       |       |--- Resample to 48kHz if sr != 48000
     |       |
+    |       |--- Data Augmentation (adding noise)
     |       |--- Padding (Zero-padding)
     |       |--- Apply Pre-emphasis (y_emp = y[0] + y[1:] - alpha * y[:-1])
     |       |--- Perform MFCC Feature Extraction
     |               |--- Configuration:
-    |               |       - Number of MFCC features (n_mfcc): 64
-    |               |       - Window length: 512
+    |               |       - Number of MFCC features (n_mfcc): 32/64/128
+    |               |       - Window length: 256/512/1024
     |               |       - Hop length: window_length / 2
     |               |       - Number of FFT points (n_fft): window_length
-    |               |       - Number of Mel filter banks (n_mels): 64
-    |               |       - Maximum frequency (fmax): sr * 0.5
+    |               |       - Number of Mel filter banks (n_mels): 32/64/128
+    |               |       - Maximum frequency (fmax): 10000
     |               |       - Window function: 'hamming'
     |               |
-    |               |--- Compute MFCC Features (librosa.feature.mfcc)
+    |               |--- Compute and Combine MFCC Features (librosa.feature.mfcc)
     |
-    |--- Return Processed Audio (y, np.array, [1, 720000]) and MFCC Features (mfcc, np.array, [64, 2813])
+    |--- Return MFCC Features (mfcc, np.array, [224, 4096])
     |
     |
-    END <dataset, pd.dataFrame, [4('wav','onset','signal','mfcc'), N_audio]>
+    END <dataset, pd.dataFrame, [3('wav','onset','mfcc'), N]>
     ```
-  - Cleaning
-    ```
-    START <dataset, pd.dataFrame, [4('wav','onset','signal','mfcc'), N_audio]>
-    |
-    |
-    |--- Audio file missing
-    |       |--- Removed from dataset
-    |
-    |--- Invalid onset annotation
-    |       |--- Removed from dataset
-    |
-    |--- Identical
-    |       |--- Removed redundant from dataset
-    |
-    |
-    END <dataset, pd.dataFrame, [4('wav','onset','signal','mfcc'), (N_audio - N_audio_bad)]>
-    ```
-  - Augmentation
-  - Train/test splitting
-#### Dataset preparation
-
 #### Model initializtion
 
 #### Training
